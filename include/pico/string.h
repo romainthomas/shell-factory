@@ -9,6 +9,8 @@ namespace Pico {
     class BasicString
     {
         public:
+            static constexpr size_t npos = -1;
+
             template <unsigned N>
             CONSTRUCTOR BasicString(const T (&src)[N])
             {
@@ -31,6 +33,25 @@ namespace Pico {
             {
                 chars = src;
                 max_size = size = length(chars) + 1;
+            }
+
+
+            CONSTRUCTOR BasicString(const T* src) :
+              BasicString{src, length(src) + 1}
+            {
+            }
+
+
+            CONSTRUCTOR BasicString(const T* src, size_t buffer_size) :
+              BasicString{buffer_size}
+            {
+
+                BasicString<T>::copy(chars, src);
+                chars[buffer_size - 1] = 0;
+
+                max_size = buffer_size;
+                size = length(chars) + 1;
+                needs_dealloc = true;
             }
 
             CONSTRUCTOR BasicString(T* src, size_t buffer_size, bool auto_free = false)
@@ -91,6 +112,10 @@ namespace Pico {
             METHOD BasicString<T> slice(int start, size_t len) const;
             METHOD bool startswith(BasicString<T> const& prefix) const;
             METHOD bool endswith(BasicString<T> const& suffix) const;
+            METHOD size_t find(BasicString<T> const& str, size_t pos = 0) const;
+            METHOD size_t find(const T* s, size_t pos, size_t count) const;
+            METHOD size_t find(const T* s, size_t pos = 0) const;
+            METHOD size_t find(T s, size_t pos) const;
 
             template <unsigned N>
             METHOD BasicString<T>& operator =(const T (&str)[N]);
@@ -102,10 +127,26 @@ namespace Pico {
             METHOD BasicString<T> operator *(unsigned count);
             METHOD BasicString<T> operator ()(int start, size_t len) const { return this->slice(start, len); }
 
+
+            template <typename Func>
+            METHOD void each_line(Func cb, T delim = '\n') {
+              size_t offset = 0;
+              size_t pos = 0;
+              BasicString<T> substr = "";
+
+              while ((pos = this->find(delim, offset)) != npos) {
+                substr = this->slice(offset, pos - offset);
+                if ( cb(substr) != 0 ) {
+                  break;
+                }
+                offset = pos + 1;
+              }
+            }
+
             // Static functions.
             template <unsigned N>
             FUNCTION PURE size_t length(const T (&)[N]) { return N-1; }
-            FUNCTION PURE size_t length(T *s);
+            FUNCTION PURE size_t length(const T *s);
             FUNCTION PURE int compare(const T *s1, const T *s2);
             FUNCTION PURE int compare(const T *s1, const T *s2, size_t n);
             FUNCTION PURE bool equals(const T *s1, const T *s2);
@@ -253,6 +294,79 @@ namespace Pico {
 
     template <typename T>
     METHOD
+    size_t BasicString<T>::find(BasicString<T> const& str, size_t pos) const {
+      if (pos >= this->length()) {
+        return npos;
+      }
+
+      if (str.length() > this->length()) {
+        return npos;
+      }
+      //!!!! NAIVE IMPLEMENTATION !!!!\\
+      //TODO: Implement Rabin-Karp / KMP algo
+
+      const size_t str_length = str.length();
+      const size_t this_idx_max = this->length() - str_length + 1;
+      for (size_t this_idx = pos; this_idx < this_idx_max; ++this_idx) {
+        size_t str_idx = 0;
+        while (str_idx < str_length and str[str_idx] == this->operator[](this_idx + str_idx)) {
+          ++str_idx;
+        }
+
+        if (str_idx == str_length) {
+          return this_idx;
+        }
+      }
+
+      return npos;
+
+    }
+
+
+    template <typename T>
+    METHOD
+    size_t BasicString<T>::find(T c, size_t pos) const {
+      if (pos >= this->length()) {
+        return npos;
+      }
+
+      for (size_t idx = pos; idx < this->length(); ++idx) {
+        if (this->operator[](idx) == c) {
+          return idx;
+        }
+      }
+
+      return npos;
+
+    }
+
+
+    template <typename T>
+    METHOD
+    size_t BasicString<T>::find(const T* s, size_t pos, size_t count) const {
+      if (pos >= this->length()) {
+        return npos;
+      }
+
+      if (count > this->length()) {
+        return npos;
+      }
+
+      BasicString<T> str{s, count};
+      return this->find(str, pos);
+
+    }
+
+    template <typename T>
+    METHOD
+    size_t BasicString<T>::find(const T* s, size_t pos) const {
+      return this->find(s, pos, length(s));
+    }
+
+
+
+    template <typename T>
+    METHOD
     void BasicString<T>::resize(size_t new_size)
     {
         // Truncating.
@@ -383,7 +497,7 @@ namespace Pico {
 
     template <>
     METHOD PURE
-    size_t BasicString<char>::length(char *s)
+    size_t BasicString<char>::length(const char *s)
     {
         if ( Options::use_builtins )
            return BUILTIN(strlen)(s);
@@ -393,7 +507,7 @@ namespace Pico {
 
     template <typename T>
     METHOD PURE
-    size_t BasicString<T>::length(T *s)
+    size_t BasicString<T>::length(const T *s)
     {
         return tstrlen(s);
     }
@@ -597,7 +711,7 @@ namespace Pico {
     {
         long long int result = 0;
         int sign = 1;
-        unsigned pow = 1;
+        long long unsigned int pow = 1;
         unsigned nr_digits = 0;
 
         while ( isspace(*nptr) )

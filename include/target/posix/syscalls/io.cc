@@ -98,7 +98,7 @@ namespace Syscall {
     SYSTEM_CALL
     int open(const char *pathname, int flags)
     {
-        #if SYSCALL_EXISTS(open)
+        #if SYSCALL_EXISTS(open) && !defined(__aarch64__)  // __NR_open is removed (https://github.com/Gallopsled/pwntools/commit/71855ebd2f448609571762285523f8c98bb8a466#diff-629e6b819627a40519d5d812c66fd440)
         return DO_SYSCALL(open, pathname, flags);
         #else
         return openat(AT_FDCWD, pathname, flags);
@@ -108,7 +108,7 @@ namespace Syscall {
     SYSTEM_CALL
     int open(const char *pathname, int flags, mode_t mode)
     {
-        #if SYSCALL_EXISTS(open)
+        #if SYSCALL_EXISTS(open) && !defined(__aarch64__)
         return DO_SYSCALL(open, pathname, flags, mode);
         #else
         return openat(AT_FDCWD, pathname, flags, mode);
@@ -298,8 +298,12 @@ namespace Syscall {
     {
         #if SYSCALL_EXISTS(mkfifo)
         return DO_SYSCALL(mkfifo, pathname, mode);
-        #else
+        #elif SYSCALL_EXISTS(mkfifoat)
         return mkfifoat(AT_FDCWD, pathname, mode);
+        #elif SYSCALL_EXISTS(mknod)
+        return mknod(pathname, (mode & ~S_IFMT) | S_IFIFO, (dev_t)0);
+        #else
+        #error "errro"
         #endif
     }
 

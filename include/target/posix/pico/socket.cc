@@ -139,7 +139,7 @@ namespace Pico {
         UnixStreamSocket::UnixStreamSocket() : StreamSocket(AF_UNIX, 0) {}
 
         METHOD
-        int Socket::get(int level, int optname, void *val, unsigned *len)
+        int Socket::get(int level, int optname, void *val, socklen_t *len)
         {
             return Syscall::getsockopt(this->file_desc(), level, optname, val, len);
         }

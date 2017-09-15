@@ -1,4 +1,4 @@
-/* 
+/*
  * Linker script for generating shell-factory targets with -N.
  */
 ENTRY(_start);
@@ -7,16 +7,18 @@ SECTIONS
 {
     PROVIDE (__executable_start = SEGMENT_START("text-segment", 0x400000));
     . = SEGMENT_START("text-segment", 0x400000) + SIZEOF_HEADERS;
-
     /*
      * The executable code.
      */
-    .text               : { *(.text .text.* .gnu.linkonce.t.*) }
+    .text               : ALIGN (CONSTANT (COMMONPAGESIZE))  { *(.text .text.* .gnu.linkonce.t.* .ARM.exidx.*) }
     PROVIDE(__etext = .);
     PROVIDE(_etext = .);
     PROVIDE(etext = .);
 
-    /* 
+    /*. = ALIGN (CONSTANT (MAXPAGESIZE)) - ((CONSTANT (MAXPAGESIZE) - .) & (CONSTANT (MAXPAGESIZE) - 1));
+    . = SEGMENT_START_ALIGN (CONSTANT (MAXPAGESIZE), CONSTANT (COMMONPAGESIZE));*/
+
+    /*
      * Constant data.
      * Merge into the text section.
      */

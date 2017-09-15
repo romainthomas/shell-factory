@@ -599,15 +599,15 @@ void *operator new[](size_t count)
     return Pico::Heap::global().allocate(count);
 }
 
-void *operator new(size_t, void *ptr)
-{
-    return ptr;
-}
+//void *operator new(size_t, void *ptr)
+//{
+//    return ptr;
+//}
 
-void *operator new[](size_t, void *ptr)
-{
-    return ptr;
-}
+//void *operator new[](size_t, void *ptr)
+//{
+//    return ptr;
+//}
 
 void operator delete(void *ptr) noexcept
 {

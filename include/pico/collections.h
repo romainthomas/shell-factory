@@ -16,6 +16,10 @@ namespace Pico {
             METHOD T&       first() const { return &storage[0]; }
             METHOD T&       last() const { return &storage[nr_elements - 1]; }
             METHOD T&       operator [](unsigned index) {
+                return const_cast<T&>(static_cast<const Collection*>(this)->operator[](index));
+            }
+
+            METHOD const T& operator [](unsigned index) const {
                 assert(index < nr_elements);
                 return storage[index];
             }

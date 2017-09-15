@@ -25,7 +25,7 @@ namespace Pico {
                 using Stream<SocketIO>::Stream; // inherit Stream constructor.
 
                 CONSTRUCTOR Socket(int domain, int type, int protocol);
-                METHOD int get(int level, int optname, void *val, unsigned *len);
+                METHOD int get(int level, int optname, void *val, socklen_t *len);
                 METHOD int set(int level, int optname, void *val, unsigned len);
 
                 template <AddressType T>

@@ -93,7 +93,9 @@
 // System types definitions.
 #include <target/types.h>
 
-#if defined(__linux__)
+#if defined(__ANDROID__)
+#include <target/android/syscalls.h>
+#elif defined(__linux__)
 #include <target/linux/syscalls.h>
 #elif defined(__FreeBSD__)
 #include <target/freebsd/syscalls.h>

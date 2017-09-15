@@ -106,6 +106,16 @@ namespace Pico {
             METHOD int              signal(int signal);
             METHOD int              wait(int *status = nullptr);
             METHOD int              kill();
+            METHOD String           name();
+            METHOD String           path();
+            METHOD String           maps();
+            METHOD String           cmdline();
+
+            METHOD Array<uintptr_t, 2> module_baseaddr(const char* module_name);
+
+            METHOD uintptr_t current_baseaddress();
+
+
 
         protected:
             process_id pid;

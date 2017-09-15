@@ -39,6 +39,27 @@ extern "C" {
     {
         return __cxa_atexit(f, objptr, dso);
     }
+
+
+    EXPORT_ABI_FUNCTION
+    void __aeabi_memclr(void *dest, size_t n)
+    {
+        memset(dest, 0, n);
+    }
+
+    // TODO: Use weak_alias
+    EXPORT_ABI_FUNCTION
+    void __aeabi_memclr4(void *dest, size_t n)
+    {
+        __aeabi_memclr(dest, n);
+    }
+
+
+    EXPORT_ABI_FUNCTION
+    void __aeabi_memclr8(void *dest, size_t n)
+    {
+        __aeabi_memclr(dest, n);
+    }
     #endif
 }
 
