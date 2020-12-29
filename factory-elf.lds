@@ -10,7 +10,7 @@ SECTIONS
     /*
      * The executable code.
      */
-    .text               : ALIGN (CONSTANT (COMMONPAGESIZE))  { *(.text .text.* .gnu.linkonce.t.* .ARM.exidx.*) }
+    .text               : ALIGN (CONSTANT (COMMONPAGESIZE))  { *(.text .text.* .gnu.linkonce.t.*) }
     PROVIDE(__etext = .);
     PROVIDE(_etext = .);
     PROVIDE(etext = .);
@@ -43,5 +43,5 @@ SECTIONS
     _end = ALIGN(4096);
     PROVIDE (eend = _end);
 
-    /DISCARD/           : { *(.note.*) }
+    /DISCARD/           : { *(.note.*) *(.ARM.exidx) *(.ARM.attributes) }
 }

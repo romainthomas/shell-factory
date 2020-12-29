@@ -1,5 +1,6 @@
 #ifndef PICOLIB_CONCURRENCY_H_
 #define PICOLIB_CONCURRENCY_H_
+#include "factory.h"
 
 namespace Pico {
 
@@ -113,14 +114,14 @@ namespace Pico {
     };
 }
 
-/* 
+/*
  * Locking of statically declared variables in functions.
  */
 extern "C" {
     using guard_type = char;
 
     EXPORT_ABI_FUNCTION int __cxa_guard_acquire(guard_type* guard)
-    { 
+    {
         Pico::Atomic<guard_type *> atom(guard);
         return atom.compare_exchange(0, 1);
     }
